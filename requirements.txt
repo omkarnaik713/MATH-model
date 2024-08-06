@@ -3,3 +3,5 @@ transformers
 huggingface_hub
 pandas 
 numpy 
+torch
+tensorflow
