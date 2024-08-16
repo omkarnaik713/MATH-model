@@ -25,14 +25,17 @@ def load_data(path):
     
     for folder in os.listdir(path):
         folder_path = os.path.join(path, folder)
-        for file in folder_path:
-            file_path = os.path.join(folder_path, file)
-            data = json.load(file_path)
-            problem.append(data.get('question'))
-            level.append(data.get('level'))
-            type.append(data.get('type'))
-            solution.append(data.get('answer'))
-    
+        if os.path.isdir(folder_path) :
+            for file in os.listdir(folder_path):
+                file_path = os.path.join(folder_path,file)
+                if os.path.isfile(file_path) and file.endswith('.json'):
+                    with open(file_path,'r') as f :
+                        data = json.load(f)
+                    problem.append(data.get('question'))
+                    level.append(data.get('level'))
+                    type.append(data.get('type'))
+                    solution.append(data.get('answer'))
+        
     complete_data = {
         'question': problem,
         'level' : level,
@@ -54,10 +57,12 @@ def convert_dataset(data):
     return prompt
 
 if __name__ == '__main__' :
-    path = '/Users/omkarnaik/Downloads/MATH'
+    train_path = '/Users/omkarnaik/Downloads/MATH/train'
     
-    dataset = load_data(path=path)
-    tf_dataset = tf_math_datasets()
+    test_path = '/Users/omkarnaik/Downloads/MATH/test'
+    
+    dataset = load_data(path=train_path)
+    #tf_dataset = tf_math_datasets()
     
     base_model = 'meta-llama/Meta-Llama-3.1-8B-Instruct'
     
