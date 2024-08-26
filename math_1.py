@@ -6,6 +6,7 @@ import tensorflow_datasets as tsdf
 import pandas 
 from transformers import (
     AutoModelForCausalLM,
+    AutoConfig,
     AutoTokenizer,
     BitsAndBytesConfig,
     HfArgumentParser,
@@ -35,25 +36,18 @@ def load_data(path):
                     level.append(data.get('level'))
                     type.append(data.get('type'))
                     solution.append(data.get('answer'))
-        
-    complete_data = {
-        'question': problem,
-        'level' : level,
-        'type' : type,
-        'answer': solution
-    }
-    df = pd.DataFrame(complete_data)
-    return complete_data
+    return problem, solution
 
 def tf_math_datasets():
     data = tsdf.load('math_dataset')
     return data
 
 
-def convert_dataset(data):
-    question = data['question']
-    answer = data['answer']
-    prompt = f'<s>[INST]{question} [/INST]{answer}</s>'
+def convert_dataset(question,answer):
+    prompt = []
+    for ques, ans in zip(question,answer) :
+        formatted_data = f'<s>[INST]{ques} [/INST]{ans}</s>'
+        prompt.append(formatted_data)
     return prompt
 
 if __name__ == '__main__' :
@@ -61,7 +55,8 @@ if __name__ == '__main__' :
     
     test_path = '/Users/omkarnaik/Downloads/MATH/test'
     
-    dataset = load_data(path=train_path)
+    question, answer = load_data(path=train_path)
+    converted_data = convert_dataset(question,answer)
     #tf_dataset = tf_math_datasets()
     
     base_model = 'meta-llama/Meta-Llama-3.1-8B-Instruct'
