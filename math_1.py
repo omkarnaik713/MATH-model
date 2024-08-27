@@ -3,7 +3,6 @@ import os
 import pandas as pd
 import torch
 import tensorflow_datasets as tsdf 
-import pandas 
 from transformers import (
     AutoModelForCausalLM,
     AutoConfig,
@@ -14,7 +13,7 @@ from transformers import (
     pipeline,
     logging,
 )
-from peft import LoraConfig, PeftModel
+from peft import LoraConfig
 from trl import SFTTrainer
 
 def load_data(path):
