@@ -1,5 +1,6 @@
 import json 
 import os 
+import huggingface_hub
 import pandas as pd
 import torch
 import tensorflow_datasets as tsdf 
@@ -15,6 +16,7 @@ from transformers import (
 )
 from peft import LoraConfig
 from trl import SFTTrainer
+huggingface_hub.login()
 
 def load_data(path):
     
@@ -50,9 +52,9 @@ def convert_dataset(question,answer):
     return prompt
 
 if __name__ == '__main__' :
-    train_path = '/Users/omkarnaik/Downloads/MATH/train'
+    train_path = '/home/omkar/MATH/train'
     
-    test_path = '/Users/omkarnaik/Downloads/MATH/test'
+    test_path = '/Users/omkar/MATH/test'
     
     question, answer = load_data(path=train_path)
     converted_data = convert_dataset(question,answer)
@@ -113,7 +115,7 @@ if __name__ == '__main__' :
     model = AutoModelForCausalLM.from_pretrained(
         base_model,
         quantization_config = bnb_config,
-        device_map = device_map
+        device_map = device_map,
     )
     model.config.use_cache = False
     model.config.pretraining_tp = 1
