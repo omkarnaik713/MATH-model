@@ -1,9 +1,9 @@
-import json 
-import os 
+import json
+import os
 import huggingface_hub
 import pandas as pd
 import torch
-import tensorflow_datasets as tsdf 
+#import tensorflow_datasets as tsdf
 from transformers import (
     AutoModelForCausalLM,
     AutoConfig,
@@ -16,15 +16,16 @@ from transformers import (
 )
 from peft import LoraConfig
 from trl import SFTTrainer
-huggingface_hub.login()
+huggingface_hub.login(token = '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')
+from datasets import Dataset
 
 def load_data(path):
-    
+
     problem = []
     level = []
     type = []
-    solution = [] 
-    
+    solution = []
+
     for folder in os.listdir(path):
         folder_path = os.path.join(path, folder)
         if os.path.isdir(folder_path) :
@@ -49,43 +50,41 @@ def convert_dataset(question,answer):
     for ques, ans in zip(question,answer) :
         formatted_data = f'<s>[INST]{ques} [/INST]{ans}</s>'
         prompt.append(formatted_data)
-    return prompt
+    return pd.DataFrame(prompt,columns=['text'])
 
 if __name__ == '__main__' :
-    train_path = '/home/omkar/MATH/train'
-    
-    test_path = '/Users/omkar/MATH/test'
-    
+    train_path = '/content/MATH/train' ###### Update to add the path for the math file i.e just change the content part for both train 
+
     question, answer = load_data(path=train_path)
-    converted_data = convert_dataset(question,answer)
+    converted_data = Dataset.from_pandas(convert_dataset(question,answer))
     #tf_dataset = tf_math_datasets()
-    
+
     base_model = 'NousResearch/Llama-2-7b-chat-hf'
-    
+
     lora_r = 64
     lora_alpha = 16
     lora_dropout = 0.1
-    
+
     device_map = {"":0}
-    
+
     use_4bit = True
     bnb_4bit_compute_dtype = 'float16'
     bnb_4bit_quant_type = "nf4"
     use_nested_quant = False
-    
+
     output_dir = "./results"
-    
+
     num_train_epochs = 1
-    
-    fp16 = False 
-    bf16 = False 
-    
+
+    fp16 = False
+    bf16 = False
+
     per_device_train_batch_size = 4
     per_device_eval_batch_size = 4
-    
+
     gradient_accumulation_steps = 1
-    gradient_checkpointing = True 
-    
+    gradient_checkpointing = True
+
     max_grad_norm = 0.3
     learning_rate = 2e-4
     weight_decay = 0.001
@@ -94,24 +93,24 @@ if __name__ == '__main__' :
     max_steps = -1
     warmup_ratio = 0.03
     group_by_length = True
-    
+
     logging_steps = 25
-    
-    max_seq_length = None 
+
+    max_seq_length = None
     packing = False
-    
-    ## loading the tokenizer 
+
+    ## loading the tokenizer
     compute_dtype = getattr(torch, bnb_4bit_compute_dtype)
-    
+
     bnb_config = BitsAndBytesConfig(
         load_in_4bit=use_4bit,
         bnb_4bit_quant_type=bnb_4bit_quant_type,
         bnb_4bit_compute_dtype=compute_dtype,
         bnb_4bit_use_double_quant=use_nested_quant
     )
-    
-    ## load the base model 
-    
+
+    ## load the base model
+
     model = AutoModelForCausalLM.from_pretrained(
         base_model,
         quantization_config = bnb_config,
@@ -119,16 +118,16 @@ if __name__ == '__main__' :
     )
     model.config.use_cache = False
     model.config.pretraining_tp = 1
-    
+
     tokenizer = AutoTokenizer.from_pretrained(
         base_model,
         trust_remote_code = True
     )
     tokenizer.pad_token = tokenizer.eos_token
     tokenizer.padding_side = 'right'
-    
-    ## loading LoRA Configuration 
-    
+
+    ## loading LoRA Configuration
+
     peft_config = LoraConfig(
         lora_alpha=lora_alpha,
         lora_dropout=lora_dropout,
@@ -136,8 +135,8 @@ if __name__ == '__main__' :
         bias = 'none',
         task_type='CAUSAL_LM',
     )
-    
-    ## setting training parameters 
+
+    ## setting training parameters
     training_arguments = TrainingArguments(
         output_dir = output_dir,
         num_train_epochs=num_train_epochs,
@@ -157,7 +156,7 @@ if __name__ == '__main__' :
         lr_scheduler_type=lr_scheduler_type,
         report_to='tensorboard'
     )
-    
+
     trainer = SFTTrainer(
         model = model,
         train_dataset = converted_data,
@@ -168,5 +167,6 @@ if __name__ == '__main__' :
         args = training_arguments,
         packing = packing,
     )
-    
+
     trainer.train()
+    trainer.save_model('##### Give the directory here to save the model')
