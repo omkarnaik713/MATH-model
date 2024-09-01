@@ -163,7 +163,7 @@ __pycache__/
 *.py[cod]
 *$py.class
 /model
-
+/MATH
 # C extensions
 *.so
 

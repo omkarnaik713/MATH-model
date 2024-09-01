@@ -3,7 +3,7 @@ import os
 import huggingface_hub
 import pandas as pd
 import torch
-#import tensorflow_datasets as tsdf
+import tensorflow_datasets as tsdf
 from transformers import (
     AutoModelForCausalLM,
     AutoConfig,
@@ -16,7 +16,7 @@ from transformers import (
 )
 from peft import LoraConfig
 from trl import SFTTrainer
-huggingface_hub.login(token = '##token')
+huggingface_hub.login(token = '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')
 from datasets import Dataset
 
 def load_data(path):
@@ -53,7 +53,7 @@ def convert_dataset(question,answer):
     return pd.DataFrame(prompt,columns=['text'])
 
 if __name__ == '__main__' :
-    train_path = '/home/dylan/Math/train' ###### Update to add the path for the math file i.e just change the content part for both train 
+    train_path = '/app/MATH/train' ###### Update to add the path for the math file i.e just change the content part for both train
 
     question, answer = load_data(path=train_path)
     converted_data = Dataset.from_pandas(convert_dataset(question,answer))
@@ -169,4 +169,3 @@ if __name__ == '__main__' :
     )
 
     trainer.train()
-    trainer.save_model('##### Give the directory here to save the model')
