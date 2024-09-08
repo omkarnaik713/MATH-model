@@ -59,7 +59,7 @@ if __name__ == '__main__' :
     converted_data = Dataset.from_pandas(convert_dataset(question,answer))
     #tf_dataset = tf_math_datasets()
 
-    base_model = 'NousResearch/Llama-2-7b-chat-hf'
+    base_model = 'meta-llama/Meta-Llama-3.1-8B-Instruct'
 
     lora_r = 64
     lora_alpha = 16
