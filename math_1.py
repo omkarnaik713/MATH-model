@@ -68,12 +68,12 @@ if __name__ == '__main__' :
 
     device_map = {"":0}
 
-    '''
+    
     use_4bit = True
     bnb_4bit_compute_dtype = 'float16'
     bnb_4bit_quant_type = "nf4"
     use_nested_quant = False
-    '''
+
     output_dir = "./results"
 
     num_train_epochs = 1
