@@ -14,9 +14,10 @@ from transformers import (
     pipeline,
     logging,
 )
+from huggingface_hub import notebook_login
 from peft import LoraConfig
 from trl import SFTTrainer
-huggingface_hub.login(token = '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')
+huggingface_hub.login(token = 'token')
 from datasets import Dataset
 
 def load_data(path):
@@ -67,11 +68,12 @@ if __name__ == '__main__' :
 
     device_map = {"":0}
 
+    '''
     use_4bit = True
     bnb_4bit_compute_dtype = 'float16'
     bnb_4bit_quant_type = "nf4"
     use_nested_quant = False
-
+    '''
     output_dir = "./results"
 
     num_train_epochs = 1
@@ -85,8 +87,8 @@ if __name__ == '__main__' :
     gradient_accumulation_steps = 1
     gradient_checkpointing = True
 
-    max_grad_norm = 0.3
-    learning_rate = 2e-4
+    max_grad_norm = 1.0
+    learning_rate = 1e-5
     weight_decay = 0.001
     optim = "paged_adamw_32bit"
     lr_scheduler_type = 'cosine'
@@ -169,3 +171,8 @@ if __name__ == '__main__' :
     )
 
     trainer.train()
+    
+    notebook_login(token = "token")
+    model_name = 'Math-model-llama-8bit'
+    model.push_to_hub(model_name)
+    tokenizer.push_to_hub(model_name)
